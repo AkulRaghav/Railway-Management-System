@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PASSENGER
+  ADMIN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum BookingStatus {
+  PENDING_PAYMENT
+  CONFIRMED
+  CANCELLED
+  WAITLISTED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String?
+  name         String
+  phone        String?
+  image        String?
+  role         Role      @default(PASSENGER)
+  createdAt    DateTime  @default(now())
+  bookings     Booking[]
+  accounts     Account[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Otp {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email, code])
+}
+
+model Train {
+  id            String       @id @default(cuid())
+  trainNumber   String       @unique
+  trainName     String
+  source        String
+  destination   String
+  departureTime String
+  arrivalTime   String
+  duration      String
+  totalSeats    Int
+  fare          Decimal
+  classes       TrainClass[]
+  bookings      Booking[]
+}
+
+model TrainClass {
+  id             String  @id @default(cuid())
+  trainId        String
+  train          Train   @relation(fields: [trainId], references: [id])
+  className      String
+  fareMultiplier Decimal
+  seatsAvailable Int
+}
+
+model Booking {
+  id            String        @id @default(cuid())
+  pnr           String        @unique
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+  trainId       String
+  train         Train         @relation(fields: [trainId], references: [id])
+  passengerName String
+  gender        Gender
+  age           Int
+  aadharNumber  String
+  address       String
+  phone         String
+  source        String
+  destination   String
+  journeyDate   DateTime
+  classBooked   String
+  seatNumber    String?
+  status        BookingStatus @default(PENDING_PAYMENT)
+  fare          Decimal
+  createdAt     DateTime      @default(now())
+  payment       Payment?
+  cancellation  Cancellation?
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  bookingId     String        @unique
+  booking       Booking       @relation(fields: [bookingId], references: [id])
+  amount        Decimal
+  status        PaymentStatus @default(PENDING)
+  transactionId String?       @unique
+  paidAt        DateTime?
+  createdAt     DateTime      @default(now())
+}
+
+model Cancellation {
+  id           String        @id @default(cuid())
+  bookingId    String        @unique
+  booking      Booking       @relation(fields: [bookingId], references: [id])
+  reason       String
+  cancelledAt  DateTime      @default(now())
+  refundAmount Decimal
+  refundStatus PaymentStatus @default(PENDING)
+}
