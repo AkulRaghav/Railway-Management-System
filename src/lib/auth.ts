@@ -29,6 +29,10 @@ export const authOptions: NextAuthOptions = {
           throw new Error("No account found with this email");
         }
 
+        if (!user.isActive) {
+          throw new Error("Your account has been suspended. Contact support.");
+        }
+
         if (!user.passwordHash) {
           throw new Error("This account uses Google sign-in. Please use the Google button.");
         }

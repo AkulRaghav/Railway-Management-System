@@ -7,7 +7,7 @@ export async function GET(request: Request) {
     const source = searchParams.get("source");
     const destination = searchParams.get("destination");
 
-    const where: Record<string, string> = {};
+    const where: Record<string, unknown> = { isActive: true };
     if (source) where.source = source;
     if (destination) where.destination = destination;
 

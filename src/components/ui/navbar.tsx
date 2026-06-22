@@ -98,6 +98,16 @@ export function Navbar() {
                       <User size={16} />
                       My Bookings
                     </Link>
+                    {(session?.user as { role?: string })?.role === "ADMIN" && (
+                      <Link
+                        href="/admin"
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-amber-400 hover:bg-slate-700 transition-colors"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <CreditCard size={16} />
+                        Admin Panel
+                      </Link>
+                    )}
                     <button
                       onClick={() => signOut({ callbackUrl: "/login" })}
                       className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-slate-700 transition-colors w-full text-left"
