@@ -39,7 +39,15 @@ export default function DashboardPage() {
     if (status === "unauthenticated") {
       router.push("/login");
     }
-  }, [status, router]);
+    // Redirect admins to their dashboard
+    if (status === "authenticated") {
+      const role = (session?.user as { role?: string })?.role;
+      if (role === "ADMIN") {
+        router.push("/admin");
+        return;
+      }
+    }
+  }, [status, session, router]);
 
   useEffect(() => {
     if (status === "authenticated") {

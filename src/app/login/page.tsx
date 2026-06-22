@@ -49,7 +49,11 @@ export default function LoginPage() {
     if (result?.error) {
       setError(result.error);
     } else {
-      router.push("/dashboard");
+      // Check role from session to redirect appropriately
+      const sessionRes = await fetch("/api/auth/session");
+      const sessionData = await sessionRes.json();
+      const role = sessionData?.user?.role;
+      router.push(role === "ADMIN" ? "/admin" : "/dashboard");
     }
   };
 
